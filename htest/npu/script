@@ -1,0 +1,7 @@
+expect to2610 boot
+expect sum ok, jump
+expect npu id 4e505531
+expect acc ok
+expect fc ok 20/20
+expect mnist ok 8/8
+expect done

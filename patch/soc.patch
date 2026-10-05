@@ -1,0 +1,59 @@
+--- a/src/soc.v
++++ b/src/soc.v
+@@ -124,6 +124,7 @@
+   wire hit_gpio = (cpu_mem_addr == `KIANV_GPIO_DIR   ||
+                    cpu_mem_addr == `KIANV_GPIO_OUTPUT||
+                    cpu_mem_addr == `KIANV_GPIO_INPUT);
++  wire is_npu = (cpu_mem_addr[31:5] == 27'h0838000);
+ 
+   wire [31:0] cache_addr_o;
+   wire [31:0] cache_din_o;
+@@ -277,6 +278,23 @@
+       .gpio_out   (gpio_out)
+   );
+ 
++  wire        npu_ready;
++  wire [31:0] npu_rdata;
++
++  npu_mmio #(
++      .BASE(32'h1070_0000)
++  ) npu_I (
++      .clk        (clk),
++      .resetn     (resetn_soc),
++      .bus_valid_i(cpu_mem_valid),
++      .bus_addr_i (cpu_mem_addr),
++      .bus_wstrb_i(cpu_mem_wstrb),
++      .bus_wdata_i(cpu_mem_wdata),
++      .bus_rdata_o(npu_rdata),
++      .bus_ready_o(npu_ready),
++      .hit_o      ()
++  );
++
+   wire spi0_ready, spi1_ready;
+   wire [31:0] spi0_rdata, spi1_rdata;
+ 
+@@ -475,7 +493,7 @@
+                         spi_mem_valid0 || spi_mem_valid1 ||
+                         div0_valid_seen || div1_valid_seen || gpio_valid ||
+                         sys_cpu_freq_valid || sys_mem_size_valid ||
+-                        sdram_cfg_access);
++                        sdram_cfg_access || is_npu);
+ 
+   reg unmatched_io_ready;
+   always @(posedge clk) begin
+@@ -571,6 +589,7 @@
+       (hit_spi0 && spi0_ready) ||
+       (hit_spi1 && spi1_ready) ||
+       (hit_gpio && gpio_ready) ||
++      (is_npu   && npu_ready) ||
+       (is_io    && io_ready) ||
+       (hit_access_fault_valid && access_fault_ready);
+ 
+@@ -580,6 +599,7 @@
+       (hit_spi0 && spi0_ready)      ? spi0_rdata      :
+       (hit_spi1 && spi1_ready)      ? spi1_rdata      :
+       (hit_gpio && gpio_ready)      ? gpio_rdata      :
++      (is_npu   && npu_ready)       ? npu_rdata       :
+       (is_io    && io_ready)        ? io_rdata        :
+       32'h0000_0000;
+ 

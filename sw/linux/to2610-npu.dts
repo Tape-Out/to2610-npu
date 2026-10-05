@@ -1,0 +1,11 @@
+/* to2610-kvc 的设备树上多一个结点：片上总线 0x1070_0000 处的 MLP 引擎 */
+/include/ "to2610-kvc.dts"
+
+/ {
+	soc {
+		npu@10700000 {
+			compatible = "tapeout,to2610-npu";
+			reg = <0x10700000 0x20>;
+		};
+	};
+};

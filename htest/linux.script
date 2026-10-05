@@ -1,0 +1,11 @@
+expect OpenSBI
+expect Linux version
+expect to2610-kvc up
+expect ~ #
+save build/linux.ckpt
+send dmesg | grep -o 'MLP engine at [0-9a-fx]*' | tr a-z A-Z\n
+expect MLP ENGINE AT 0X10700000
+send mnist\n
+expect mnist npu ok 8/8
+send echo sd=$(ls /sys/bus/spi/drivers/mmc_spi | grep -c spi)$(dmesg | grep -c 'mode bits')\n
+expect sd=00
