@@ -10,7 +10,8 @@ jobs:
     permissions:
       contents: write
     with:
-      # 整片测试：ran asic 用 sv2v 与 yosys 展平出交付的 .v，测试台跑在 Verilator 上，程序用裸机的 RISC-V GCC 编
-      apt: yosys verilator gcc-riscv64-unknown-elf qemu-system-riscv
-      pip: pyyaml
+      # 整片测试：ran asic 用 sv2v 与 yosys 展平出交付的 .v，测试台跑在 Verilator 上，程序用裸机的 RISC-V GCC 编；
+      # OpenCL 那一层现编 PoCL，引擎的 RTL 在 iverilog 上由 cocotb 驱动
+      apt: yosys verilator gcc-riscv64-unknown-elf qemu-system-riscv iverilog cmake ninja-build
+      pip: pyyaml cocotb==1.9.2
       sv2v: v0.0.13

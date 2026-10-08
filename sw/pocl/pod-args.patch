@@ -1,0 +1,13 @@
+diff --git a/lib/CL/pocl_builtin_kernels.c b/lib/CL/pocl_builtin_kernels.c
+index c868f1d..dddd7ac 100644
+--- a/lib/CL/pocl_builtin_kernels.c
++++ b/lib/CL/pocl_builtin_kernels.c
+@@ -488,7 +488,7 @@ pocl_clone_builtin_kernel_metadata (cl_device_id dev,
+   for (unsigned Arg = 0; Arg < source->num_args; ++Arg)
+     {
+       pocl_argument_info *SrcArg = &source->arg_info[Arg];
+-      if (SrcArg->type == POCL_ARG_TYPE_MUTABLE)
++      if (SrcArg->type == POCL_ARG_TYPE_MUTABLE && extra)
+         {
+           assert (extra);
+           SrcArg = &extra[Arg];

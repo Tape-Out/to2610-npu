@@ -89,9 +89,24 @@ tasks:
     desc: 出流片的 .v，在它上面跑 to2610-kvc 的两段、引擎的裸机测试，以及 Linux 下经驱动认 MNIST
     run: bash htest/chip.sh {{out}} {{dep.gf180mcu-kianv-rv32ima-sv32}} {{dep.to2610-kvc}}
     timeout: 21000
+  webnn:
+    desc: 随片的 MNIST 模型用 WebNN 建图计算，与基线、与 soft_fc 逐项比；改一个权要不同
+    run: bash htest/webnn.sh {{out}}
+    timeout: 1800
+  pocl:
+    desc: 编带 tnpu 设备的 PoCL，经 OpenCL 的内建内核 pocl.dnn.dense.relu.i8 在引擎的 RTL 上跑 MNIST 与随机层，与 soft_fc 逐项比
+    run: bash htest/pocl.sh {{out}} {{dep.gf180mcu-kianv-rv32ima-sv32}} {{dep.ttsky25a-tinyqv}}
+    timeout: 1800
+  pocl-faults:
+    desc: tnpu 设备里逐个改掉一处（权的位置、权的行、ReLU、偏置），PoCL 那一层要红，四处
+    run: bash htest/pocl-faults.sh {{out}} {{dep.gf180mcu-kianv-rv32ima-sv32}} {{dep.ttsky25a-tinyqv}}
+    timeout: 3600
 test:
   upstream:
   - { name: chip, task: chip, timeout: 21000 }
+  - { name: webnn, task: webnn, timeout: 1800 }
+  - { name: pocl, task: pocl, timeout: 1800 }
+  - { name: pocl-faults, task: pocl-faults, timeout: 3600 }
 targets:
   foreign:
     driver: foreign
