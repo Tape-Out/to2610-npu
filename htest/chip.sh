@@ -3,6 +3,7 @@
 #   hello  to2610-kvc 的裸机冒烟原样跑一遍：加了引擎之后原有的东西不许变
 #   periph to2610-kvc 的外设测试原样跑一遍：GPIO、两路 SPI、计时器中断、PLIC、重启
 #   isa    标准 riscv-tests 逐个跑，同 to2610-kvc：加了引擎之后核的行为不许变
+#   arch-test  riscv-arch-test 的非特权部分，同 to2610-kvc
 #   boot   引导程序带回显载荷，同上
 #   npu    引擎的裸机测试：认出引擎、累加器读写、随机全连接与软件逐项比、两层 MLP 认八张 MNIST
 #   image  载荷里的内核带着根文件系统先在 QEMU 上起到 shell（to2610-kvc 的那一关）：镜像坏了一分钟就知道
@@ -44,7 +45,13 @@ t0=$SECONDS
 rc=0
 SIM="$O/sim" bash "$K/htest/isa.sh" "$O/isa" > "$O/isa.log" 2>&1 || rc=$?
 tail -n 3 "$O/isa.log"
-res+=("isa=$rc:$((SECONDS - t0)):riscv-tests 的 rv32ui、um、ua、mi、si 逐个在这份 .v 上跑，程序放进 SDRAM、测试台盯 tohost；已知失败钉住，多过一个少过一个都算红")
+res+=("isa=$rc:$((SECONDS - t0)):riscv-tests 的 rv32ui、um、ua、mi、si 逐个在这份 .v 上跑，程序放进 SDRAM、测试台盯 tohost；79 个全过，不适用的 5 个（Zacas、硬件非对齐访存、PMP、调试触发器）不跑")
+
+t0=$SECONDS
+rc=0
+SIM="$O/sim" bash "$K/htest/arch-test.sh" "$O/arch-test" > "$O/arch-test.log" 2>&1 || rc=$?
+tail -n 3 "$O/arch-test.log"
+res+=("arch-test=$rc:$((SECONDS - t0)):riscv-arch-test（ACT4）的 I、M、Zmmul、Zaamo、Zalrsc、Zicsr、Zifencei、Zicntr 共 71 个自检程序逐个在这份 .v 上跑，期望值出自 Sail 模型")
 
 make -s -C "$L/sw/boot" O="$O/boot"
 make -s -C "$L/htest/echo" O="$O/echo"
