@@ -32,6 +32,8 @@ $ python3 ../to2610-kvc/sw/pack.py boot.bin build/linux/fw_payload.bin flash.bin
 
 `sw/linux/to2610_npu.c` is the kernel driver: it checks the ID register and maps the register page to user space as `/dev/npu`.
 
+`sw/pocl/` adds a `tnpu` device to PoCL, which runs the built-in kernel `pocl.dnn.dense.relu.i8` on the engine. `sw/webnn/mnist.py` writes the same model as a W3C WebNN graph; its results match the engine's term by term.
+
 ## Testing and tape-out
 
 ```console
@@ -40,7 +42,15 @@ $ ran test to2610-npu                     # the chip tests, on the Verilog file 
 $ ran asic to2610-npu                     # to2610_npu.v, ecc at 50 MHz, report.json
 ```
 
-The chip tests run on Verilator with pin-level models of the SDRAM, the flash and the UART: the two bare-metal tests of `to2610-kvc` unchanged, a bare-metal test of the engine against software and upstream's numpy baseline, and Linux running `mnist`.
+The chip tests run on Verilator with pin-level models of the SDRAM, the flash and the UART.
+
+| Test | What |
+|:--:|:--:|
+| `hello`, `periph`, `isa`, `arch-test`, `boot` | the tests of `to2610-kvc` unchanged: bare metal, riscv-tests, riscv-arch-test, the boot loader |
+| `npu` | the engine against software and upstream's numpy baseline: twenty random multiply-accumulates, and the two-layer MLP on eight digits |
+| `image`, `linux` | the image boots in QEMU, then from flash on this chip; the driver finds the engine and `mnist` reads the eight digits through `/dev/npu` |
+| `pocl` | OpenCL through `tnpu`: the device is listed, and a random dense layer and the MNIST model match software |
+| `pocl-faults` | four faults planted in `tnpu` in turn; each must turn a test red |
 
 ## License
 
